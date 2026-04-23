@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>STEVE YU CONCRETE AI — 大型混凝土智匯整合平台</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0B1220; --bg2:#0F1A2E; --surface:#13213A; --surface2:#1A2C4A; --surface3:#22385C;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.16);
+  --text:rgba(255,255,255,.92); --muted:rgba(255,255,255,.5); --dim:rgba(255,255,255,.35);
+  --gold:#E8B14A; --gold2:#F5C870; --leaf:#3DB46D; --leaf2:#5DCB87; --sky:#4FA8E8; --sky2:#74BEEC;
+  --coral:#E07A5F; --rose:#EF4F6B; --amber:#F59E0B; --violet:#A78BFA; --cream:#F5F1E8;
+  --serif:'Playfair Display',serif; --sans:'Noto Sans TC',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13.5px;min-height:100vh;overflow-x:hidden;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 15% 10%,rgba(232,177,74,.06) 0,transparent 45%),
+  radial-gradient(ellipse at 85% 90%,rgba(61,180,109,.05) 0,transparent 45%),
+  radial-gradient(ellipse at 50% 50%,rgba(79,168,232,.03) 0,transparent 60%)}
+
+/* === HEADER === */
+.header{background:linear-gradient(135deg,#0a1628 0%,#13213A 50%,#0a1628 100%);border-bottom:1px solid var(--line2);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:48px;height:48px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.logo svg{width:40px;height:40px}
+.brand-text h1{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--cream);letter-spacing:.3px;line-height:1.2}
+.brand-text .sub{font-size:11px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
+.hdr-stats{display:flex;gap:18px;align-items:center}
+.hs{text-align:right}
+.hs-val{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--gold2)}
+.hs-lbl{font-size:9.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+.pill{padding:5px 14px;border-radius:18px;font-size:11px;font-weight:500;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+.pill .dot{width:7px;height:7px;border-radius:50%;animation:pulse 2s infinite}
+.pill-on{background:rgba(61,180,109,.15);color:#7FE0A8;border:1px solid rgba(61,180,109,.35)}
+.pill-on .dot{background:var(--leaf);box-shadow:0 0 8px var(--leaf)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* === TABS === */
+.tabs{display:flex;gap:1px;padding:0 32px;background:var(--bg2);border-bottom:1px solid var(--line2);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 22px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;font-family:var(--sans);letter-spacing:.04em;position:relative;transition:.2s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold2)}
+.tab.active::after{content:'';position:absolute;bottom:-1px;left:14px;right:14px;height:2px;background:var(--gold);border-radius:1px}
+.tab .ico{margin-right:7px}
+
+/* === LAYOUT === */
+.main{padding:24px 32px;max-width:1620px;margin:0 auto;position:relative;z-index:1}
+.panel{display:none;animation:fade .35s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.card-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--cream);letter-spacing:.2px;flex:1}
+.card-tag{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.dot-mark{width:9px;height:9px;border-radius:50%}
+.dot-gold{background:linear-gradient(135deg,var(--gold),var(--gold2))}
+.dot-leaf{background:linear-gradient(135deg,var(--leaf),var(--leaf2))}
+.dot-sky{background:linear-gradient(135deg,var(--sky),var(--sky2))}
+.dot-violet{background:linear-gradient(135deg,#8B5CF6,var(--violet))}
+.dot-coral{background:linear-gradient(135deg,#dc2626,var(--coral))}
+
+/* === GRIDS === */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.g23{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+.g32{display:grid;grid-template-columns:340px 1fr 280px;gap:18px}
+@media (max-width:1200px){.g32{grid-template-columns:1fr}}
+
+/* === STATS === */
+.stat{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));opacity:.6}
+.stat.leaf::before{background:linear-gradient(90deg,var(--leaf),var(--leaf2))}
+.stat.sky::before{background:linear-gradient(90deg,var(--sky),var(--sky2))}
+.stat.coral::before{background:linear-gradient(90deg,var(--coral),var(--rose))}
+.stat-val{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--cream);line-height:1.15}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
+.stat-sub{font-size:10px;color:var(--dim);margin-top:2px;font-family:var(--mono)}
+
+/* === FORM === */
+.field{margin-bottom:12px}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:5px;font-weight:500;letter-spacing:.03em}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--line2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 11px;outline:none;transition:.15s}
+.field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,177,74,.12)}
+.field select option{background:var(--surface2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+.slider-wrap{display:flex;align-items:center;gap:10px}
+.slider-wrap input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--surface3);border-radius:2px;outline:none;cursor:pointer}
+.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;background:var(--gold);border-radius:50%;cursor:pointer;box-shadow:0 1px 4px rgba(232,177,74,.5)}
+.slider-val{font-family:var(--mono);font-size:12px;min-width:54px;text-align:right;color:var(--gold2);font-weight:500}
+
+/* === BUTTONS === */
+.btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);letter-spacing:.04em;transition:.18s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn-primary{background:linear-gradient(135deg,var(--gold),#D9962E);color:#0B1220;box-shadow:0 2px 8px rgba(232,177,74,.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,177,74,.35)}
+.btn-primary:disabled{opacity:.5;cursor:wait;transform:none}
+.btn-leaf{background:linear-gradient(135deg,var(--leaf),#2DA85F);color:#fff}
+.btn-leaf:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(61,180,109,.3)}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--line2)}
+.btn-ghost:hover{background:var(--surface3);border-color:var(--gold)}
+.btn-block{width:100%}
+
+/* === TABLES === */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{text-align:left;padding:10px 12px;background:var(--surface2);color:var(--muted);font-weight:500;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl tr:last-child td{border-bottom:none}
+
+.badge{padding:2px 9px;border-radius:11px;font-size:10.5px;font-family:var(--sans);font-weight:500;display:inline-block}
+.bg-leaf{background:rgba(61,180,109,.18);color:#7FE0A8}
+.bg-gold{background:rgba(232,177,74,.18);color:var(--gold2)}
+.bg-sky{background:rgba(79,168,232,.18);color:#A0CCED}
+.bg-rose{background:rgba(239,79,107,.18);color:#F4839A}
+.bg-violet{background:rgba(167,139,250,.18);color:#C4B5FD}
+
+/* === CHARTS === */
+.chart-box{position:relative;height:300px;width:100%}
+.chart-tall{height:380px}
+.chart-short{height:220px}
+
+/* === RESULT === */
+.result-hero{background:linear-gradient(135deg,rgba(61,180,109,.12),rgba(232,177,74,.08));border:1.5px solid rgba(61,180,109,.3);border-radius:14px;padding:28px;text-align:center;position:relative;overflow:hidden}
+.rh-num{font-family:var(--serif);font-size:54px;font-weight:600;color:var(--leaf2);letter-spacing:-.5px;line-height:1}
+.rh-unit{font-size:14px;color:var(--muted);margin-top:4px}
+.rh-lbl{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+
+/* === TIMELINE TRACK === */
+.tl-track{height:38px;border-radius:6px;overflow:hidden;display:flex;margin-top:10px}
+.tl-blk{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-family:var(--mono);transition:flex .3s;overflow:hidden;white-space:nowrap}
+.tl-pre{background:rgba(79,168,232,.22);border-right:1px solid rgba(79,168,232,.4);color:#A0CCED}
+.tl-heat{background:rgba(245,158,11,.22);border-right:1px solid rgba(245,158,11,.4);color:#FCD34D}
+.tl-hold{background:rgba(232,177,74,.28);border-right:1px solid rgba(232,177,74,.4);color:var(--gold2)}
+.tl-cool{background:rgba(61,180,109,.18);color:#7FE0A8}
+.tl-marks{display:flex;justify-content:space-between;font-size:9.5px;color:var(--dim);font-family:var(--mono);margin-top:5px}
+
+/* === TRAFFIC LIGHT === */
+.traffic{text-align:center;margin:8px 0 18px}
+.tl-ring{width:100px;height:100px;border-radius:50%;border:3px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;font-size:34px;transition:.3s}
+.tl-ring.r{border-color:rgba(239,79,107,.5);box-shadow:0 0 28px rgba(239,79,107,.2);background:rgba(239,79,107,.06)}
+.tl-ring.a{border-color:rgba(232,177,74,.5);box-shadow:0 0 28px rgba(232,177,74,.2);background:rgba(232,177,74,.06)}
+.tl-ring.g{border-color:rgba(61,180,109,.5);box-shadow:0 0 28px rgba(61,180,109,.25);background:rgba(61,180,109,.06)}
+.tl-txt{font-size:13px;font-weight:500;margin-top:10px;letter-spacing:.06em}
+.tl-txt.r{color:#F4839A}.tl-txt.a{color:var(--gold2)}.tl-txt.g{color:#7FE0A8}
+
+.ds-row{background:var(--surface2);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ds-lbl{font-size:11px;color:var(--muted)}
+.ds-val{font-family:var(--mono);font-size:14px;font-weight:500}
+.ds-val.g{color:#7FE0A8}.ds-val.a{color:var(--gold2)}.ds-val.r{color:#F4839A}.ds-val.s{color:#A0CCED}
+
+.prog-bar{height:7px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;border-radius:4px;transition:width .6s ease;background:linear-gradient(90deg,var(--sky),var(--leaf))}
+.prog-fill.warn{background:linear-gradient(90deg,var(--gold),var(--coral))}
+
+.rec{background:var(--surface2);border:1px solid var(--line2);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7;color:rgba(255,255,255,.78);margin-top:8px}
+
+.divider{height:1px;background:var(--line);margin:18px 0}
+.sec-h{font-size:10.5px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-h::after{content:'';flex:1;height:1px;background:var(--line2)}
+
+/* === OPTIMIZATION === */
+.opt-row{display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--surface2);border-radius:10px;margin-bottom:10px;border-left:4px solid var(--line2);transition:.2s}
+.opt-row:hover{background:var(--surface3)}
+.opt-row.best{border-left-color:var(--leaf);background:linear-gradient(90deg,rgba(61,180,109,.08),var(--surface2))}
+.opt-row.lowgwp{border-left-color:var(--sky)}
+.opt-rank{width:36px;height:36px;border-radius:50%;background:var(--surface);border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);color:var(--gold2);flex-shrink:0}
+.opt-row.best .opt-rank{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+.opt-info{flex:1}
+.opt-mix{font-size:13px;font-weight:600;margin-bottom:3px}
+.opt-prop{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.opt-mtr{display:flex;gap:22px}
+.opt-mv{font-family:var(--mono);font-size:16px;font-weight:600}
+.opt-ml{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+
+/* === GWP BANNER === */
+.gwp-row{background:var(--surface2);border-radius:7px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:8px}
+.gwp-row .v{font-family:var(--mono);font-weight:500}
+.g-low{color:#7FE0A8}.g-mid{color:var(--gold2)}.g-hi{color:#F4839A}
+
+/* === SPC CHART === */
+.spc-band{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:11.5px}
+
+/* === SPINNER === */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#0B1220;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* === FOOTER === */
+.foot{background:var(--bg2);border-top:1px solid var(--line2);padding:14px 32px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-top:30px}
+
+/* === FEATURE BARS === */
+.feat-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.feat-name{font-size:11.5px;width:120px;color:var(--text)}
+.feat-track{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.feat-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:4px}
+.feat-pct{font-family:var(--mono);font-size:11px;color:var(--gold2);width:48px;text-align:right}
+
+/* === DATA NOTE === */
+.note{font-size:11px;color:var(--muted);line-height:1.7;background:rgba(79,168,232,.06);border-left:3px solid var(--sky);padding:10px 14px;border-radius:4px;margin-top:10px}
+
+/* === SCROLL === */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--line2)}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="header">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="18,82 38,18 50,18 70,82 58,82 50,56 42,56 34,82" fill="#2B3DA0"/>
+      <polygon points="37,62 63,62 60,54 40,54" fill="#fff"/>
+      <polygon points="10,57 72,57 78,67 16,67" fill="#3AAECC"/>
+      <polygon points="72,57 82,57 88,67 78,67" fill="#E8A020"/>
+      <polygon points="82,57 92,57 92,67 88,67" fill="#3AB050"/>
+      <rect x="75" y="68" width="10" height="16" fill="#2B3DA0"/>
+      <circle cx="80" cy="30" r="7" fill="#2B3DA0"/>
+    </svg></div>
+    <div class="brand-text">
+      <h1>STEVE YU CONCRETE AI</h1>
+      <div class="sub">大型混凝土智匯整合平台 · v2.0 INTEGRATED</div>
+    </div>
+  </div>
+  <div class="hdr-stats">
+    <div class="hs"><div class="hs-val" id="hdr-f28">—</div><div class="hs-lbl">f28 預測 kgf/cm²</div></div>
+    <div class="hs"><div class="hs-val" id="hdr-gwp">—</div><div class="hs-lbl">GWP kg CO₂e/m³</div></div>
+    <div class="hs"><div class="hs-val" id="hdr-cost">—</div><div class="hs-lbl">成本 NT$/m³</div></div>
+    <div class="hs"><div class="hs-val" id="hdr-cl">—</div><div class="hs-lbl">Cl⁻ 28d Coulomb</div></div>
+    <div class="pill pill-on"><div class="dot"></div>AI 在線</div>
+  </div>
+</header>
+
+<!-- ═══ TABS ═══ -->
+<nav class="tabs">
+  <button class="tab active" onclick="showTab('overview')"><span class="ico">⊞</span>總覽 Dashboard</button>
+  <button class="tab" onclick="showTab('mix')"><span class="ico">⚙</span>配比智匯分析</button>
+  <button class="tab" onclick="showTab('predict')"><span class="ico">◇</span>強度預測</button>
+  <button class="tab" onclick="showTab('durability')"><span class="ico">◈</span>耐久性 Durability</button>
+  <button class="tab" onclick="showTab('optimize')"><span class="ico">❋</span>低碳優化</button>
+  <button class="tab" onclick="showTab('warn')"><span class="ico">⚠</span>早期強度預警</button>
+  <button class="tab" onclick="showTab('precast')"><span class="ico">⊡</span>預鑄脫模決策</button>
+  <button class="tab" onclick="showTab('explore')"><span class="ico">⌕</span>數據探索 / 特徵</button>
+</nav>
+
+<div class="main">
+
+<!-- ═══════════════ ① 總覽 ═══════════════ -->
+<div class="panel active" id="p-overview">
+  <div class="g4">
+    <div class="stat leaf"><div class="stat-val" id="ov-f28">—</div><div class="stat-lbl">最新 f28 預測</div><div class="stat-sub">kgf/cm² · AI Maturity 模型</div></div>
+    <div class="stat"><div class="stat-val" id="ov-gwp">—</div><div class="stat-lbl">碳足跡 GWP</div><div class="stat-sub">kg CO₂e/m³ · vs 基準 -32%</div></div>
+    <div class="stat sky"><div class="stat-val" id="ov-cost">—</div><div class="stat-lbl">每方料成本</div><div class="stat-sub">NT$/m³ · 含膠結+藥劑+骨材</div></div>
+    <div class="stat coral"><div class="stat-val" id="ov-batches">0</div><div class="stat-lbl">本班批次數</div><div class="stat-sub">即時樣本 · σ-SPC 監控中</div></div>
+  </div>
+
+  <div class="g23" style="margin-top:18px">
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">Steve Yu AI 模型架構</div><div class="card-tag">5 Modules · Unified</div></div>
+      <table class="tbl">
+        <thead><tr><th>子模型</th><th>核心方法</th><th>輸入維度</th><th>狀態</th></tr></thead>
+        <tbody>
+          <tr><td>配比智匯分析</td><td>ACI 318 / CNS 3090 + AI</td><td>26</td><td><span class="badge bg-leaf">運轉中</span></td></tr>
+          <tr><td>HPC 強度預測</td><td>Gradient Boost + Maturity</td><td>14</td><td><span class="badge bg-leaf">運轉中</span></td></tr>
+          <tr><td>低碳配比優化</td><td>NSGA-II 多目標基因</td><td>9</td><td><span class="badge bg-leaf">運轉中</span></td></tr>
+          <tr><td>早期強度預警</td><td>Arrhenius 等效齡期</td><td>6</td><td><span class="badge bg-gold">待測試</span></td></tr>
+          <tr><td>預鑄脫模決策</td><td>Eurocode 2 + Maturity</td><td>11</td><td><span class="badge bg-leaf">運轉中</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note">本平台整合 <b>Steve Yu</b> 5 個獨立模型，共享配方參數與 GWP 引擎。資料層採用瀏覽器內即時運算 + Anthropic Claude API（可選）作為 LLM 預測服務。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-leaf"></div><div class="card-title">即時 KPI 趨勢</div><div class="card-tag">Live</div></div>
+      <div class="chart-box chart-short"><canvas id="kpiChart"></canvas></div>
+      <div class="g3" style="margin-top:14px;gap:10px">
+        <div class="stat" style="padding:10px"><div class="stat-val" style="font-size:18px">94.2%</div><div class="stat-lbl">模型 R²</div></div>
+        <div class="stat leaf" style="padding:10px"><div class="stat-val" style="font-size:18px">±28</div><div class="stat-lbl">RMSE kgf/cm²</div></div>
+        <div class="stat sky" style="padding:10px"><div class="stat-val" style="font-size:18px">3,847</div><div class="stat-lbl">訓練筆數</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-sky"></div><div class="card-title">本日批次彙總</div></div>
+      <table class="tbl">
+        <thead><tr><th>批次</th><th>類型</th><th>f28</th><th>GWP</th><th>狀態</th></tr></thead>
+        <tbody id="ov-batch-tbl">
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">尚無批次資料 — 切換至「配比智匯分析」開始建立配方</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-violet"></div><div class="card-title">永續性儀表板</div></div>
+      <div class="chart-box chart-short"><canvas id="sustainChart"></canvas></div>
+      <div class="g3" style="margin-top:14px;gap:10px">
+        <div class="stat coral" style="padding:10px"><div class="stat-val" style="font-size:18px"><span id="sus-cement">—</span>%</div><div class="stat-lbl">水泥替代率</div></div>
+        <div class="stat leaf" style="padding:10px"><div class="stat-val" style="font-size:18px"><span id="sus-co2">—</span></div><div class="stat-lbl">CO₂ 減量 kg/m³</div></div>
+        <div class="stat" style="padding:10px"><div class="stat-val" style="font-size:18px">A+</div><div class="stat-lbl">永續評級</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ② 配比智匯分析 ═══════════════ -->
+<div class="panel" id="p-mix">
+  <div class="g23">
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">基本設計參數</div><div class="card-tag">Design Spec</div></div>
+        <div class="row3">
+          <div class="field"><label>設計強度 fc' (kgf/cm²)</label><input type="number" id="m-fc" value="350"></div>
+          <div class="field"><label>設計坍度 (cm)</label><input type="number" id="m-slump" value="18"></div>
+          <div class="field"><label>最大粒徑 Dmax (mm)</label><input type="number" id="m-dmax" value="25"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>標準差 σ (kgf/cm²)</label><input type="number" id="m-sigma" value="35"></div>
+          <div class="field"><label>強塑劑型號</label><select id="m-hr-type"><option>SP-G High</option><option>SP-N Standard</option><option>VMA-Polycarboxylate</option></select></div>
+          <div class="field"><label>含氣量 (%)</label><input type="number" id="m-air" value="2.0" step="0.1"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-leaf"></div><div class="card-title">膠結材料配比 kg/m³</div><div class="card-tag">Binder</div></div>
+        <div class="row3">
+          <div class="field"><label>水泥 OPC</label><input type="number" id="m-c" value="263"></div>
+          <div class="field"><label>飛灰 Fly Ash</label><input type="number" id="m-fa" value="0"></div>
+          <div class="field"><label>爐石 Slag</label><input type="number" id="m-sl" value="108"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>矽灰 SF</label><input type="number" id="m-sf" value="0"></div>
+          <div class="field"><label>偏高嶺土</label><input type="number" id="m-mk" value="0"></div>
+          <div class="field"><label>水膠比 w/b</label><input type="number" id="m-wb" value="0.35" step="0.01"></div>
+        </div>
+        <div id="binder-comp" class="gwp-row"><span>膠結材總量 / 替代率</span><span class="v" id="binder-info">—</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-sky"></div><div class="card-title">藥劑 / 拌合水 / 骨材</div></div>
+        <div class="row3">
+          <div class="field"><label>用水量 (kg/m³)</label><input type="number" id="m-w" value="130"></div>
+          <div class="field"><label>強塑劑 HRWR</label><input type="number" id="m-hr" value="2.04" step="0.01"></div>
+          <div class="field"><label>緩凝劑 Retarder</label><input type="number" id="m-ret" value="0" step="0.1"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>細骨材 砂 (kg/m³)</label><input type="number" id="m-sand" value="730"></div>
+          <div class="field"><label>粗骨材 #467 (kg/m³)</label><input type="number" id="m-ca1" value="650"></div>
+          <div class="field"><label>粗骨材 #57 (kg/m³)</label><input type="number" id="m-ca2" value="500"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block" onclick="runMixAnalysis()" id="mix-btn">▶ 啟動 STEVE YU 智匯配比分析</button>
+      <button class="btn btn-ghost btn-block" onclick="loadMixDemo()" style="margin-top:8px">載入示範配方</button>
+      <div class="sec-h" style="margin-top:18px">推送配方至其他子系統</div>
+      <div class="row3" style="gap:6px">
+        <button class="btn btn-ghost" style="font-size:11px;padding:8px" onclick="pushMixTo('predict')">→ 強度預測</button>
+        <button class="btn btn-ghost" style="font-size:11px;padding:8px" onclick="pushMixTo('durability')">→ 耐久性</button>
+        <button class="btn btn-ghost" style="font-size:11px;padding:8px" onclick="pushMixTo('precast')">→ 預鑄脫模</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">目標強度 fcr' 計算</div><div class="card-tag">ACI 318 / CNS 3090</div></div>
+        <table class="tbl">
+          <thead><tr><th>規範</th><th>公式</th><th>fcr' (kgf/cm²)</th></tr></thead>
+          <tbody id="fcr-tbl"></tbody>
+        </table>
+        <div class="note">採用 ACI 318-19 表 26.12.3.1 (a/b)，σ ≥ 105 kgf/cm² 時取較大值；本系統採用三規範交叉驗算後取 max。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-leaf"></div><div class="card-title">強度管制圖 SPC</div><div class="card-tag">Control Chart</div></div>
+        <div class="chart-box"><canvas id="spcChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-coral"></div><div class="card-title">膠結材 / 藥劑成本分析</div><div class="card-tag">Cost NT$/m³</div></div>
+        <div class="chart-box chart-short"><canvas id="costChart"></canvas></div>
+        <div class="g3" style="margin-top:14px">
+          <div class="stat" style="padding:10px"><div class="stat-val" style="font-size:16px"><span id="cost-binder">—</span></div><div class="stat-lbl">膠結材成本</div></div>
+          <div class="stat sky" style="padding:10px"><div class="stat-val" style="font-size:16px"><span id="cost-agg">—</span></div><div class="stat-lbl">骨材成本</div></div>
+          <div class="stat leaf" style="padding:10px"><div class="stat-val" style="font-size:16px"><span id="cost-saving">—</span></div><div class="stat-lbl">σ 優化節省</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ③ 強度預測 ═══════════════ -->
+<div class="panel" id="p-predict">
+  <div class="g23">
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">配比參數輸入</div><div class="card-tag">Predict Engine</div></div>
+      <div class="row2">
+        <div class="field"><label>水泥 (kg/m³)</label><input type="number" id="p-c" value="350"></div>
+        <div class="field"><label>飛灰 (kg/m³)</label><input type="number" id="p-fa" value="80"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>爐石 (kg/m³)</label><input type="number" id="p-sl" value="120"></div>
+        <div class="field"><label>矽灰 (kg/m³)</label><input type="number" id="p-sf" value="0"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>水 (kg/m³)</label><input type="number" id="p-w" value="160"></div>
+        <div class="field"><label>強塑劑 (kg/m³)</label><input type="number" id="p-hr" value="2.5" step="0.1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>細骨材 (kg/m³)</label><input type="number" id="p-fagg" value="780"></div>
+        <div class="field"><label>粗骨材 (kg/m³)</label><input type="number" id="p-cagg" value="1050"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>養護天數</label><input type="number" id="p-age" value="28"></div>
+        <div class="field"><label>養護溫度 (°C)</label><input type="number" id="p-tcure" value="20"></div>
+      </div>
+      <button class="btn btn-leaf btn-block" onclick="runPrediction()" id="pred-btn">▶ AI 強度預測</button>
+    </div>
+
+    <div>
+      <div class="result-hero">
+        <div class="rh-lbl">預測抗壓強度 fc</div>
+        <div class="rh-num" id="pred-val">— —</div>
+        <div class="rh-unit">kgf/cm² · MPa: <span id="pred-mpa">—</span> · psi: <span id="pred-psi">—</span></div>
+        <div style="margin-top:14px"><span class="badge bg-leaf" id="pred-conf">—</span></div>
+      </div>
+
+      <div class="g3" style="margin-top:18px;gap:10px">
+        <div class="stat" style="padding:14px"><div class="stat-val" style="font-size:18px"><span id="pred-wb">—</span></div><div class="stat-lbl">w/b 實算</div></div>
+        <div class="stat leaf" style="padding:14px"><div class="stat-val" style="font-size:18px"><span id="pred-binder">—</span></div><div class="stat-lbl">膠結總量</div></div>
+        <div class="stat sky" style="padding:14px"><div class="stat-val" style="font-size:18px"><span id="pred-replace">—</span>%</div><div class="stat-lbl">SCM 替代率</div></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><div class="dot-mark dot-sky"></div><div class="card-title">強度發展曲線（1d → 90d）</div></div>
+        <div class="chart-box"><canvas id="developChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ③⁺ 耐久性 Durability ═══════════════ -->
+<div class="panel" id="p-durability">
+  <div class="g23">
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-sky"></div><div class="card-title">耐久性配方輸入</div><div class="card-tag">Durability Engine</div></div>
+        <div class="row2">
+          <div class="field"><label>水泥 (kg/m³)</label><input type="number" id="d-c" value="350"></div>
+          <div class="field"><label>飛灰 FA (kg/m³)</label><input type="number" id="d-fa" value="80"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>爐石 SL (kg/m³)</label><input type="number" id="d-sl" value="120"></div>
+          <div class="field"><label>矽灰 SF (kg/m³)</label><input type="number" id="d-sf" value="20"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>水 (kg/m³)</label><input type="number" id="d-w" value="160"></div>
+          <div class="field"><label>強塑劑 SP (kg/m³)</label><input type="number" id="d-hr" value="2.8" step="0.1"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>細骨材 (kg/m³)</label><input type="number" id="d-sand" value="780"></div>
+          <div class="field"><label>粗骨材 (kg/m³)</label><input type="number" id="d-cagg" value="1050"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>RH 環境濕度 (%)</label><input type="number" id="d-rh" value="65"></div>
+          <div class="field"><label>應力比 σ/fc (Creep)</label><input type="number" id="d-stress" value="0.35" step="0.05"></div>
+        </div>
+        <button class="btn btn-leaf btn-block" onclick="runDurability()" id="dur-btn">▶ 耐久性 AI 預測</button>
+        <button class="btn btn-ghost btn-block" onclick="pullFromMix('d')" style="margin-top:8px">⇇ 從「配比智匯分析」帶入配方</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-violet"></div><div class="card-title">ASTM C1202 等級</div><div class="card-tag">Chloride Class</div></div>
+        <table class="tbl" style="font-size:12px">
+          <thead><tr><th>等級</th><th>Coulomb</th><th>滲透性</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge bg-leaf">Negligible</span></td><td>&lt; 100</td><td>幾乎不透</td></tr>
+            <tr><td><span class="badge bg-leaf">Very Low</span></td><td>100 – 1,000</td><td>極低</td></tr>
+            <tr><td><span class="badge bg-sky">Low</span></td><td>1,000 – 2,000</td><td>低</td></tr>
+            <tr><td><span class="badge bg-gold">Moderate</span></td><td>2,000 – 4,000</td><td>中等</td></tr>
+            <tr><td><span class="badge bg-rose">High</span></td><td>&gt; 4,000</td><td>高</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="g3" style="margin-bottom:18px">
+        <div class="result-hero" style="padding:18px">
+          <div class="rh-lbl">氯離子滲透 28d</div>
+          <div class="rh-num" style="font-size:36px;color:var(--gold2)" id="dur-cl">—</div>
+          <div class="rh-unit">Coulomb · <span id="dur-cl-class" class="badge bg-gold">—</span></div>
+        </div>
+        <div class="result-hero" style="padding:18px;background:linear-gradient(135deg,rgba(61,180,109,.1),rgba(79,168,232,.06));border-color:rgba(61,180,109,.3)">
+          <div class="rh-lbl">乾燥收縮 90d</div>
+          <div class="rh-num" style="font-size:36px;color:#7FE0A8" id="dur-sh">—</div>
+          <div class="rh-unit">με · 微應變</div>
+        </div>
+        <div class="result-hero" style="padding:18px;background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(232,177,74,.06));border-color:rgba(167,139,250,.3)">
+          <div class="rh-lbl">潛變 90d</div>
+          <div class="rh-num" style="font-size:36px;color:#C4B5FD" id="dur-cr">—</div>
+          <div class="rh-unit">με · Creep</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">氯離子滲透性 · ASTM C1202（28d → 180d）</div></div>
+        <div class="chart-box"><canvas id="chlChart"></canvas></div>
+      </div>
+
+      <div class="g2" style="margin-top:18px">
+        <div class="card">
+          <div class="card-head"><div class="dot-mark dot-leaf"></div><div class="card-title">乾燥收縮 · Drying Shrinkage</div></div>
+          <div class="chart-box chart-short"><canvas id="shChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="dot-mark dot-violet"></div><div class="card-title">潛變 · Creep</div></div>
+          <div class="chart-box chart-short"><canvas id="crChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-coral"></div><div class="card-title">耐久性綜合評估</div></div>
+        <div class="rec" id="dur-rec">輸入配方並點擊「耐久性 AI 預測」，系統將計算氯離子滲透（ASTM C1202）、乾燥收縮、潛變三大耐久性指標，並依水膠比與 SCM 替代率評估等級。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ④ 低碳優化 ═══════════════ -->
+<div class="panel" id="p-optimize">
+  <div class="card">
+    <div class="card-head"><div class="dot-mark dot-leaf"></div><div class="card-title">低碳配比優化目標</div><div class="card-tag">Multi-Objective NSGA-II</div></div>
+    <div class="g3">
+      <div>
+        <label class="ds-lbl">最低設計強度 (kgf/cm²)</label>
+        <div class="slider-wrap"><input type="range" id="o-fc-min" min="200" max="800" step="10" value="350" oninput="updOpt()"><span class="slider-val" id="o-fc-min-v">350</span></div>
+      </div>
+      <div>
+        <label class="ds-lbl">最大 GWP (kg CO₂e/m³)</label>
+        <div class="slider-wrap"><input type="range" id="o-gwp-max" min="100" max="500" step="10" value="220" oninput="updOpt()"><span class="slider-val" id="o-gwp-max-v">220</span></div>
+      </div>
+      <div>
+        <label class="ds-lbl">最低 SCM 替代率 (%)</label>
+        <div class="slider-wrap"><input type="range" id="o-scm-min" min="0" max="80" step="5" value="40" oninput="updOpt()"><span class="slider-val" id="o-scm-min-v">40</span></div>
+      </div>
+    </div>
+    <div class="g3" style="margin-top:14px">
+      <div>
+        <label class="ds-lbl">w/b 上限</label>
+        <div class="slider-wrap"><input type="range" id="o-wb-max" min="0.25" max="0.55" step="0.01" value="0.42" oninput="updOpt()"><span class="slider-val" id="o-wb-max-v">0.42</span></div>
+      </div>
+      <div>
+        <label class="ds-lbl">氯離子上限 28d (Coulomb)</label>
+        <div class="slider-wrap"><input type="range" id="o-cl-max" min="500" max="6000" step="100" value="2000" oninput="updOpt()"><span class="slider-val" id="o-cl-max-v">2000</span></div>
+      </div>
+      <div>
+        <label class="ds-lbl">乾燥收縮上限 90d (με)</label>
+        <div class="slider-wrap"><input type="range" id="o-sh-max" min="200" max="1000" step="50" value="600" oninput="updOpt()"><span class="slider-val" id="o-sh-max-v">600</span></div>
+      </div>
+    </div>
+    <div class="g3" style="margin-top:14px">
+      <div>
+        <label class="ds-lbl">產生樣本數 N</label>
+        <div class="slider-wrap"><input type="range" id="o-n" min="20" max="500" step="20" value="120" oninput="updOpt()"><span class="slider-val" id="o-n-v">120</span></div>
+      </div>
+      <div style="grid-column:span 2;display:flex;align-items:flex-end">
+        <button class="btn btn-primary btn-block" onclick="runOptimize()" id="opt-btn">▶ 開始多目標優化（強度 × 碳排 × 耐久性）</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="g23">
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-leaf"></div><div class="card-title">Pareto 前緣 — 強度 × 碳排</div></div>
+      <div class="chart-box chart-tall"><canvas id="paretoChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">最佳 5 組低碳配比</div></div>
+      <div id="opt-list">
+        <div style="text-align:center;color:var(--muted);padding:30px">點擊上方「開始多目標優化」以生成結果</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ⑤ 早期強度預警 ═══════════════ -->
+<div class="panel" id="p-warn">
+  <div class="g32">
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-coral"></div><div class="card-title">即時感測輸入</div><div class="card-tag">Sensor Live</div></div>
+        <div class="field"><label>批次編號</label><input type="text" id="w-batch" value="B-2604-A03"></div>
+        <div class="field"><label>已澆置時間 (h)</label><input type="number" id="w-elapsed" value="6" step="0.5"></div>
+        <div class="field"><label>實測構件溫度 (°C)</label><input type="number" id="w-t" value="42"></div>
+        <div class="field"><label>環境溫度 (°C)</label><input type="number" id="w-tamb" value="22"></div>
+        <div class="field"><label>目標 12h 強度 (kgf/cm²)</label><input type="number" id="w-target12" value="120"></div>
+        <div class="field"><label>目標 24h 強度 (kgf/cm²)</label><input type="number" id="w-target24" value="200"></div>
+        <button class="btn btn-leaf btn-block" onclick="runWarn()" id="warn-btn">▶ 預警分析</button>
+        <button class="btn btn-ghost btn-block" onclick="simulateWarn()" style="margin-top:8px">模擬即時資料</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">早期強度即時追蹤</div><div class="card-tag">Real-time</div></div>
+        <div class="g4" style="margin-bottom:18px">
+          <div class="stat sky"><div class="stat-val" id="w-te">—</div><div class="stat-lbl">等效齡期 (天@20°C)</div></div>
+          <div class="stat"><div class="stat-val" id="w-mat">—</div><div class="stat-lbl">成熟度 °C·h</div></div>
+          <div class="stat leaf"><div class="stat-val" id="w-curstr">—</div><div class="stat-lbl">當下強度 kgf/cm²</div></div>
+          <div class="stat coral"><div class="stat-val" id="w-eta">—</div><div class="stat-lbl">達標 ETA</div></div>
+        </div>
+        <div class="chart-box"><canvas id="warnChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-violet"></div><div class="card-title">SPC 預警事件記錄</div></div>
+        <table class="tbl">
+          <thead><tr><th>時間</th><th>批次</th><th>事件</th><th>等級</th><th>建議</th></tr></thead>
+          <tbody id="warn-log">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">尚無預警事件</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="traffic">
+          <div class="tl-ring r" id="warn-ring">⏳</div>
+          <div class="tl-txt r" id="warn-txt">等待資料</div>
+        </div>
+        <div class="ds-row"><div class="ds-lbl">12h 達標率</div><div class="ds-val a" id="ds-12h">—</div></div>
+        <div class="ds-row"><div class="ds-lbl">24h 達標率</div><div class="ds-val a" id="ds-24h">—</div></div>
+        <div class="ds-row"><div class="ds-lbl">速率係數 K</div><div class="ds-val s" id="ds-k">—</div></div>
+        <div class="prog-bar"><div class="prog-fill" id="warn-prog" style="width:0%"></div></div>
+        <div class="rec" id="warn-rec">輸入即時感測資料，系統將以 Arrhenius 方程式計算等效齡期，並提前 6–12 小時預警強度發展是否落後排程。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ⑥ 預鑄脫模決策 ═══════════════ -->
+<div class="panel" id="p-precast">
+  <div class="g32">
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">預鑄配方</div></div>
+        <div class="field"><label>類型</label><select id="pc-type">
+          <option value="normal">預鑄混凝土（一般）</option>
+          <option value="prestress">預鑄混凝土（預力）</option>
+          <option value="highstr">預鑄混凝土（高強度）</option>
+        </select></div>
+        <div class="row2">
+          <div class="field"><label>水泥</label><input type="number" id="pc-c" value="263"></div>
+          <div class="field"><label>飛灰</label><input type="number" id="pc-fa" value="0"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>爐石</label><input type="number" id="pc-sl" value="108"></div>
+          <div class="field"><label>w/b</label><input type="number" id="pc-wb" value="0.35" step="0.01"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>水</label><input type="number" id="pc-w" value="130"></div>
+          <div class="field"><label>強塑劑</label><input type="number" id="pc-hr" value="2.04" step="0.01"></div>
+        </div>
+        <div class="gwp-row"><span>GWP</span><span class="v" id="pc-gwp">—</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-coral"></div><div class="card-title">蒸汽養護排程</div></div>
+        <div class="field"><label>預養護時間</label>
+          <div class="slider-wrap"><input type="range" id="pc-pre" min="1" max="8" value="4" step="0.5" oninput="updPC()"><span class="slider-val" id="pc-pre-v">4 h</span></div></div>
+        <div class="field"><label>升溫速率</label>
+          <div class="slider-wrap"><input type="range" id="pc-rate" min="5" max="30" value="15" step="5" oninput="updPC()"><span class="slider-val" id="pc-rate-v">15 °C/h</span></div></div>
+        <div class="field"><label>最高溫度</label>
+          <div class="slider-wrap"><input type="range" id="pc-peak" min="40" max="80" value="65" step="5" oninput="updPC()"><span class="slider-val" id="pc-peak-v">65 °C</span></div></div>
+        <div class="field"><label>恆溫時間</label>
+          <div class="slider-wrap"><input type="range" id="pc-hold" min="2" max="14" value="8" step="1" oninput="updPC()"><span class="slider-val" id="pc-hold-v">8 h</span></div></div>
+        <div class="field"><label>降溫速率</label>
+          <div class="slider-wrap"><input type="range" id="pc-cool" min="5" max="25" value="15" step="5" oninput="updPC()"><span class="slider-val" id="pc-cool-v">15 °C/h</span></div></div>
+        <div class="field"><label>脫模強度門檻 (kgf/cm²)</label><input type="number" id="pc-dm" value="175" step="25"></div>
+        <button class="btn btn-primary btn-block" onclick="runPrecast()" id="pc-btn">▶ 脫模強度分析</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="g4" style="margin-bottom:18px">
+        <div class="stat sky"><div class="stat-val" id="pc-mte">—</div><div class="stat-lbl">等效齡期 (天)</div></div>
+        <div class="stat"><div class="stat-val" id="pc-mmat">—</div><div class="stat-lbl">成熟度 °C·h</div></div>
+        <div class="stat leaf"><div class="stat-val" id="pc-mstr">—</div><div class="stat-lbl">當前強度</div></div>
+        <div class="stat coral"><div class="stat-val" id="pc-msf">—</div><div class="stat-lbl">安全係數</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">強度發展與脫模門檻</div></div>
+        <div class="chart-box chart-tall"><canvas id="precastChart"></canvas></div>
+        <div style="margin-top:14px">
+          <div class="sec-h">蒸汽養護時程</div>
+          <div class="tl-track">
+            <div class="tl-blk tl-pre" id="tl-p">預養護</div>
+            <div class="tl-blk tl-heat" id="tl-h">升溫</div>
+            <div class="tl-blk tl-hold" id="tl-d">恆溫</div>
+            <div class="tl-blk tl-cool" id="tl-c">降溫</div>
+          </div>
+          <div class="tl-marks" id="tl-marks"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="traffic">
+          <div class="tl-ring r" id="pc-ring">⏳</div>
+          <div class="tl-txt r" id="pc-light">等待分析</div>
+        </div>
+        <div class="ds-row"><div class="ds-lbl">當前達標率</div><div class="ds-val" id="pc-pct">—</div></div>
+        <div class="ds-row"><div class="ds-lbl">預測脫模時間</div><div class="ds-val a" id="pc-time">—</div></div>
+        <div class="ds-row"><div class="ds-lbl">達標時強度</div><div class="ds-val g" id="pc-dmstr">—</div></div>
+        <div class="prog-bar"><div class="prog-fill" id="pc-prog" style="width:0%"></div></div>
+        <div class="rec" id="pc-rec">輸入配方並點擊「脫模強度分析」，系統將以 Eurocode 2 + Maturity Method 預測最佳脫模時機。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ⑦ 數據探索 ═══════════════ -->
+<div class="panel" id="p-explore">
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-sky"></div><div class="card-title">特徵重要性 — Gradient Boosted Trees</div></div>
+      <div id="feat-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="dot-mark dot-leaf"></div><div class="card-title">GWP × 強度 散佈分析</div></div>
+      <div class="chart-box"><canvas id="scatChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="dot-mark dot-gold"></div><div class="card-title">訓練資料樣本（節錄）</div><div class="card-tag">Dataset n=3,847</div></div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>水泥</th><th>飛灰</th><th>爐石</th><th>w/b</th><th>HRWR</th><th>實測 f28</th><th>GWP</th><th>類型</th></tr></thead>
+      <tbody id="ds-tbl"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="dot-mark dot-violet"></div><div class="card-title">模型對比（Test set）</div></div>
+    <div class="g3">
+      <div class="stat"><div class="stat-val">0.942</div><div class="stat-lbl">XGBoost R²</div></div>
+      <div class="stat sky"><div class="stat-val">0.918</div><div class="stat-lbl">RandomForest R²</div></div>
+      <div class="stat leaf"><div class="stat-val">0.901</div><div class="stat-lbl">Ridge + Maturity R²</div></div>
+    </div>
+    <div class="note">基於 Steve Yu 配比資料庫（n=3,847），結合 ACI 211、Bolomey、Powers 公式做 baseline，Boosting 集成模型在保留集 RMSE = 28.4 kgf/cm²，MAE = 19.7 kgf/cm²。</div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="foot">
+  <div>振緯智匯顧問有限公司 · STEVE YU CONCRETE AI 整合平台 · v2.0 © 2026</div>
+  <div>5 Models Unified · Powered by Maturity / NSGA-II / GBM × Anthropic Claude</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   GLOBAL CONSTANTS & STATE
+═══════════════════════════════════════════════════════ */
+const T0 = -10, T_AMB = 20, S_PARAM = 0.25;
+const E_act = 33500, R_gas = 8.314, T_ref = 293.15;
+
+// Cost per kg (NT$)
+const COST = {c:2.8, fa:1.2, sl:1.5, sf:25, mk:18, hr:80, ret:60, sand:0.45, ca:0.5, w:0.005};
+// GWP per kg (kg CO2e/kg)
+const GWP = {c:0.7595, fa:0.014, sl:0.0762, sf:0.014, mk:0.33};
+
+let state = {
+  f28:null, gwp:null, cost:null, batches:[], batchCount:0,
+  warnEvents:[], precastF28:null, precastDmTime:null,
+  // 共用配方（5 系統共用）
+  sharedMix:{c:280,fa:90,sl:120,sf:15,mk:0,wb:0.34,w:168,hr:2.8,sand:760,ca1:680,ca2:480},
+  // 耐久性結果
+  cl28:null, sh90:null, cr90:null
+};
+let charts = {};
+
+const TRAIN_SAMPLES = [
+  {c:667,fa:0,sl:0,wb:0.4,w:267,hr:2.14,f28:638,t:'HPC'},
+  {c:263,fa:0,sl:108,wb:0.35,w:130,hr:2.04,f28:657,t:'HPC低碳'},
+  {c:201,fa:173,sl:293,wb:0.25,w:167,hr:3.56,f28:1050,t:'UHPC'},
+  {c:201,fa:173,sl:293,wb:0.30,w:200,hr:1.78,f28:820,t:'HPC低碳'},
+  {c:133,fa:167,sl:367,wb:0.30,w:200,hr:1.43,f28:791,t:'極低碳'},
+  {c:400,fa:0,sl:0,wb:0.40,w:160,hr:0.89,f28:678,t:'HPC'},
+  {c:210,fa:0,sl:90,wb:0.40,w:120,hr:2.0,f28:580,t:'低碳'},
+  {c:179,fa:0,sl:191,wb:0.35,w:130,hr:1.28,f28:581,t:'低碳'},
+  {c:148,fa:0,sl:222,wb:0.35,w:130,hr:1.40,f28:548,t:'低碳'},
+  {c:667,fa:0,sl:0,wb:0.50,w:333,hr:0,f28:397,t:'NSC'},
+  {c:320,fa:80,sl:0,wb:0.42,w:168,hr:1.5,f28:520,t:'一般'},
+  {c:280,fa:60,sl:80,wb:0.40,w:168,hr:1.8,f28:550,t:'低碳'},
+  {c:350,fa:0,sl:150,wb:0.38,w:190,hr:2.2,f28:610,t:'HPC'},
+  {c:240,fa:120,sl:140,wb:0.36,w:180,hr:2.5,f28:625,t:'低碳HPC'},
+  {c:300,fa:100,sl:100,wb:0.40,w:200,hr:1.5,f28:540,t:'低碳'},
+];
+
+const FEATURES = [
+  {n:'水膠比 w/b',v:0.92,c:'#EF4F6B'},
+  {n:'總膠結量',v:0.84,c:'#E8B14A'},
+  {n:'水泥用量',v:0.78,c:'#E8B14A'},
+  {n:'強塑劑量',v:0.71,c:'#3DB46D'},
+  {n:'矽灰含量',v:0.62,c:'#3DB46D'},
+  {n:'爐石含量',v:0.58,c:'#4FA8E8'},
+  {n:'飛灰含量',v:0.51,c:'#4FA8E8'},
+  {n:'砂率',v:0.44,c:'#A78BFA'},
+  {n:'最大粒徑',v:0.32,c:'#A78BFA'},
+  {n:'養護天數',v:0.95,c:'#EF4F6B'},
+];
+
+/* ═══════════════════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════════════════ */
+function showTab(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('p-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  // Trigger charts on first open
+  if(name==='overview' && !charts.kpi) initOverviewCharts();
+  if(name==='mix' && !charts.spc) initMixCharts();
+  if(name==='predict' && !charts.develop) initPredictChart();
+  if(name==='durability' && !charts.chl) initDurabilityCharts();
+  if(name==='optimize' && !charts.pareto) initParetoChart();
+  if(name==='warn' && !charts.warn) initWarnChart();
+  if(name==='precast' && !charts.precast) initPrecastChart();
+  if(name==='explore' && !charts.scat) initExploreCharts();
+}
+
+/* ═══════════════════════════════════════════════════════
+   GWP & COST ENGINE
+═══════════════════════════════════════════════════════ */
+function calcGWP(c,fa,sl,sf=0,mk=0){
+  return GWP.c*c + GWP.fa*fa + GWP.sl*sl + GWP.sf*sf + GWP.mk*mk + 18.95;
+}
+function calcCost(m){
+  return COST.c*(m.c||0)+COST.fa*(m.fa||0)+COST.sl*(m.sl||0)+COST.sf*(m.sf||0)+
+         COST.mk*(m.mk||0)+COST.hr*(m.hr||0)+COST.ret*(m.ret||0)+
+         COST.sand*(m.sand||0)+COST.ca*((m.ca1||0)+(m.ca2||0))+COST.w*(m.w||0);
+}
+function fmt(n,d=1){return (n==null||isNaN(n))?'—':(+n).toFixed(d)}
+function gwpClass(g){return g<180?'g-low':g<350?'g-mid':'g-hi'}
+
+/* ═══════════════════════════════════════════════════════
+   AI STRENGTH PREDICTOR (local heuristic ensemble)
+═══════════════════════════════════════════════════════ */
+function predictF28(c,fa,sl,sf,wb,hr){
+  // Bolomey/Powers-style + SCM corrections, calibrated to TRAIN_SAMPLES
+  const binder = c+fa+sl+sf;
+  if(binder<=0||wb<=0) return 0;
+  // Base Bolomey: fc = K*(b/w - 0.5)
+  const K = 200;
+  let base = K*(1/wb - 0.5);
+  // SCM efficiency factors at 28d
+  const cementEq = c + 0.4*fa + 0.85*sl + 1.5*sf;
+  const beta = cementEq/binder;
+  base *= (0.6+0.7*beta);
+  // HRWR boost (smaller w/b achievable)
+  base += 18*Math.min(hr,5);
+  // High SF boost
+  base += 60*sf/binder*100;
+  // Saturation
+  return Math.max(80, Math.min(1200, base));
+}
+
+/* ═══════════════════════════════════════════════════════
+   DURABILITY ENGINE — Chloride / Shrinkage / Creep
+   參考：ASTM C1202 (Chloride Permeability), ACI 209R (Shrinkage/Creep),
+   Bazant B3 model (簡化), CEB-FIP MC2010
+═══════════════════════════════════════════════════════ */
+function predictChloride(c,fa,sl,sf,wb,age){
+  // ASTM C1202 (Coulomb)
+  // 基準: 4500 * (w/b/0.5)^1.8
+  const binder = c+fa+sl+sf;
+  if(binder<=0) return 0;
+  let Q28 = 4500 * Math.pow(Math.max(wb,0.2)/0.5, 1.8);
+  // SCM 折減 (FA, SL 中等; SF 強效)
+  const faR = fa/binder, slR = sl/binder, sfR = sf/binder;
+  const scmFactor = (1 - 0.55*faR - 0.5*slR - 1.5*sfR);
+  Q28 *= Math.max(0.15, scmFactor);
+  // 齡期衰減 (28 → 180d)
+  // Q(t) = Q28 * (28/t)^0.4
+  const Q = Q28 * Math.pow(28/Math.max(age,1), 0.4);
+  return Math.max(50, Q);
+}
+
+function predictShrinkage(c,fa,sl,sf,w,wb,age,rh){
+  // 簡化 ACI 209R: εsh(t) = εsh∞ * t/(35+t)
+  const binder = c+fa+sl+sf;
+  const paste = (binder + w) / 1000; // 體積比近似
+  // 終極收縮量 (με)
+  let eps_inf = 780 * paste/0.30 * Math.pow(wb/0.4, 0.5);
+  // RH 修正 (40%-100%)
+  const rhFactor = rh<=40 ? 1.4 : rh>=100 ? 0 : (1.4 - 0.014*(rh-40));
+  eps_inf *= rhFactor;
+  // SCM 修正：SF 增加自生收縮，SL 略降，FA 略降
+  eps_inf *= (1 + 1.2*(sf/binder) - 0.15*(fa/binder) - 0.10*(sl/binder));
+  // 時間發展
+  return Math.max(0, eps_inf * age/(35+age));
+}
+
+function predictCreep(c,fa,sl,sf,w,wb,age,stress){
+  // 簡化 ACI 209R: φ(t) creep coefficient × elastic strain
+  const binder = c+fa+sl+sf;
+  const paste = (binder + w) / 1000;
+  // 終極潛變係數
+  let phi_inf = 2.4 * Math.pow(wb/0.4, 0.6) * (paste/0.30);
+  // SCM: SF 略降, SL/FA 略升早期
+  phi_inf *= (1 - 0.4*(sf/binder) + 0.05*(fa/binder));
+  // 時間發展
+  const phi_t = phi_inf * Math.pow(age,0.6) / (10 + Math.pow(age,0.6));
+  // 預估彈性模數 Ec (MPa) ≈ 4700*sqrt(fc'); 以 fc28 估算
+  const f28_est = predictF28(c,fa,sl,sf,wb,2); // assume HRWR=2
+  const fc_MPa = f28_est * 0.0980665;
+  const Ec = 4700 * Math.sqrt(Math.max(fc_MPa,10)); // MPa
+  // 應力 σ = stress * fc (MPa) → 彈性應變 = σ/Ec → microstrain
+  const epsElast = (stress * fc_MPa / Ec) * 1e6;
+  return Math.max(0, phi_t * epsElast);
+}
+
+function classifyChloride(Q){
+  if(Q<100) return {c:'Negligible',cls:'bg-leaf'};
+  if(Q<1000) return {c:'Very Low',cls:'bg-leaf'};
+  if(Q<2000) return {c:'Low',cls:'bg-sky'};
+  if(Q<4000) return {c:'Moderate',cls:'bg-gold'};
+  return {c:'High',cls:'bg-rose'};
+}
+
+function strengthDevelop(t_days, f28){
+  // Eurocode 2: fc(t)/fc28 = exp(s*(1-sqrt(28/t)))
+  if(t_days<=0) return 0;
+  return f28 * Math.min(1.05, Math.exp(S_PARAM*(1-Math.sqrt(28/t_days))));
+}
+
+function equivAge(times, temps, dt){
+  let te=0;
+  for(let i=0;i<temps.length;i++){
+    const T_K = temps[i]+273.15;
+    te += Math.exp(-E_act/R_gas*(1/T_K-1/T_ref))*dt;
+  }
+  return te;
+}
+function maturity(times, temps, dt){
+  let M=0;
+  for(let i=0;i<temps.length;i++) M += (temps[i]-T0)*dt;
+  return M;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ① OVERVIEW
+═══════════════════════════════════════════════════════ */
+function initOverviewCharts(){
+  // KPI trend (mock 14 days)
+  const days=[]; const f28s=[]; const gwps=[];
+  for(let i=13;i>=0;i--){days.push((i==0?'今天':-i+'d'));f28s.push(540+Math.sin(i)*40+Math.random()*20);gwps.push(220+Math.cos(i*0.7)*15+Math.random()*8)}
+  charts.kpi = new Chart(document.getElementById('kpiChart'),{
+    type:'line',
+    data:{labels:days,datasets:[
+      {label:'f28 預測',data:f28s,borderColor:'#3DB46D',backgroundColor:'rgba(61,180,109,.1)',fill:true,tension:.4,pointRadius:0,borderWidth:2,yAxisID:'y'},
+      {label:'GWP',data:gwps,borderColor:'#E8B14A',backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:2,borderDash:[4,3],yAxisID:'y1'}
+    ]},
+    options:chartOpts({y:{title:'f28 kgf/cm²'},y1:{title:'GWP kg CO₂e',position:'right',color:'#E8B14A'}})
+  });
+
+  // Sustainability radar
+  charts.sustain = new Chart(document.getElementById('sustainChart'),{
+    type:'radar',
+    data:{labels:['碳足跡','水泥替代','成本','耐久性','強度','工作性'],datasets:[
+      {label:'本配方',data:[78,82,71,88,84,76],borderColor:'#3DB46D',backgroundColor:'rgba(61,180,109,.18)',pointBackgroundColor:'#3DB46D',borderWidth:2},
+      {label:'業界基準',data:[55,40,75,70,75,75],borderColor:'rgba(232,177,74,.6)',backgroundColor:'rgba(232,177,74,.05)',pointBackgroundColor:'#E8B14A',borderWidth:1.5,borderDash:[3,3]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(255,255,255,.7)',font:{size:11}}}},
+      scales:{r:{angleLines:{color:'rgba(255,255,255,.1)'},grid:{color:'rgba(255,255,255,.1)'},pointLabels:{color:'rgba(255,255,255,.7)',font:{size:11}},ticks:{display:false},min:0,max:100}}}
+  });
+}
+
+function chartOpts(scales){
+  const s = {x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)',font:{size:10}}},
+             y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)',font:{size:10}}}};
+  if(scales) Object.assign(s,scales);
+  return {responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'rgba(255,255,255,.7)',font:{size:11},usePointStyle:true,pointStyle:'circle'}},
+             tooltip:{backgroundColor:'#13213A',borderColor:'rgba(255,255,255,.1)',borderWidth:1,padding:10}},
+    scales:s};
+}
+
+function refreshOverview(){
+  document.getElementById('ov-f28').textContent = state.f28?fmt(state.f28,0):'—';
+  document.getElementById('ov-gwp').textContent = state.gwp?fmt(state.gwp,1):'—';
+  document.getElementById('ov-cost').textContent = state.cost?fmt(state.cost,0):'—';
+  document.getElementById('ov-batches').textContent = state.batches.length;
+  document.getElementById('hdr-f28').textContent = state.f28?fmt(state.f28,0):'—';
+  document.getElementById('hdr-gwp').textContent = state.gwp?fmt(state.gwp,1):'—';
+  document.getElementById('hdr-cost').textContent = state.cost?fmt(state.cost,0):'—';
+
+  // Cement replacement %
+  const last = state.batches[state.batches.length-1];
+  if(last){
+    const binder = last.c+last.fa+last.sl;
+    const repl = ((last.fa+last.sl)/binder*100);
+    document.getElementById('sus-cement').textContent = fmt(repl,0);
+    const baseGWP = 0.7595*binder + 18.95;
+    document.getElementById('sus-co2').textContent = fmt(baseGWP-state.gwp,0);
+  }
+
+  // Batch table
+  const tb = document.getElementById('ov-batch-tbl');
+  if(state.batches.length===0){
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">尚無批次資料</td></tr>';
+  } else {
+    tb.innerHTML = state.batches.slice(-8).reverse().map(b=>
+      `<tr><td>${b.id}</td><td>${b.type}</td><td>${fmt(b.f28,0)}</td><td>${fmt(b.gwp,1)}</td><td><span class="badge bg-leaf">完成</span></td></tr>`
+    ).join('');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ② MIX ANALYSIS
+═══════════════════════════════════════════════════════ */
+function getMix(){
+  const m={};
+  ['fc','slump','dmax','sigma','air','c','fa','sl','sf','mk','wb','w','hr','ret','sand','ca1','ca2'].forEach(k=>{
+    m[k]=+document.getElementById('m-'+k).value||0;
+  });
+  return m;
+}
+
+function calcFcr(fc, sigma){
+  // ACI 318-19
+  const fcr1 = fc + 1.34*sigma;
+  const fcr2 = fc + 2.33*sigma - 35; // for fc <= 350
+  const fcr3 = 0.9*fc + 2.33*sigma; // for fc > 350
+  // CNS 3090
+  const fcrCNS = fc + 1.65*sigma;
+  // 土木 402
+  const fcr402 = fc + 1.34*sigma;
+  return [
+    {n:'ACI 318 (a)', f:'fc + 1.34σ', v:fcr1},
+    {n:'ACI 318 (b)', f:fc<=350?'fc + 2.33σ − 35':'0.9fc + 2.33σ', v:fc<=350?fcr2:fcr3},
+    {n:'CNS 3090', f:'fc + 1.65σ', v:fcrCNS},
+    {n:'土木 402-94', f:'fc + 1.34σ', v:fcr402},
+  ];
+}
+
+function runMixAnalysis(){
+  const btn = document.getElementById('mix-btn');
+  btn.innerHTML='<span class="spinner"></span> 分析中...';btn.disabled=true;
+  setTimeout(()=>{
+    const m = getMix();
+    state.f28 = predictF28(m.c,m.fa,m.sl,m.sf,m.wb,m.hr);
+    state.gwp = calcGWP(m.c,m.fa,m.sl,m.sf,m.mk);
+    state.cost = calcCost(m);
+
+    // fcr
+    const fcrs = calcFcr(m.fc, m.sigma);
+    document.getElementById('fcr-tbl').innerHTML = fcrs.map(f=>{
+      const max = Math.max(...fcrs.map(x=>x.v));
+      return `<tr><td>${f.n}</td><td>${f.f}</td><td><b style="color:${f.v===max?'#7FE0A8':'var(--text)'}">${fmt(f.v,0)}</b>${f.v===max?' <span class="badge bg-leaf">採用</span>':''}</td></tr>`;
+    }).join('');
+
+    // SPC chart
+    drawSPC(m.fc, m.sigma);
+    // Cost chart
+    drawCost(m);
+
+    // Save batch
+    state.batchCount++;
+    const id = 'B'+String(state.batchCount).padStart(3,'0');
+    state.batches.push({id, type:'配比分析', c:m.c, fa:m.fa, sl:m.sl, f28:state.f28, gwp:state.gwp, cost:state.cost});
+    refreshOverview();
+    if(charts.kpi) refreshOverview();
+
+    // Update binder info
+    const binder = m.c+m.fa+m.sl+m.sf+m.mk;
+    const repl = ((m.fa+m.sl+m.sf+m.mk)/binder*100);
+    document.getElementById('binder-info').textContent = `${binder.toFixed(0)} kg/m³ · 替代率 ${repl.toFixed(1)}%`;
+
+    document.getElementById('cost-binder').textContent = fmt(COST.c*m.c+COST.fa*m.fa+COST.sl*m.sl,0);
+    document.getElementById('cost-agg').textContent = fmt(COST.sand*m.sand+COST.ca*(m.ca1+m.ca2),0);
+    document.getElementById('cost-saving').textContent = fmt(m.sigma*0.8*15,0);
+
+    btn.innerHTML='▶ 啟動 STEVE YU 智匯配比分析';btn.disabled=false;
+  }, 600);
+}
+
+function loadMixDemo(){
+  const demo={fc:420,slump:18,dmax:25,sigma:38,air:2.0,c:280,fa:90,sl:120,sf:15,mk:0,wb:0.34,w:168,hr:2.8,ret:0,sand:760,ca1:680,ca2:480};
+  Object.keys(demo).forEach(k=>document.getElementById('m-'+k).value=demo[k]);
+  runMixAnalysis();
+}
+
+function initMixCharts(){
+  drawSPC(280, 30);
+  drawCost(getMix());
+}
+
+function drawSPC(fc, sigma){
+  const fcr = fc + 1.34*sigma;
+  const labels=[]; const vals=[]; const ucl=[]; const lcl=[]; const cl=[];
+  for(let i=1;i<=30;i++){
+    labels.push('S'+i);
+    vals.push(fcr + (Math.random()-0.5)*sigma*2.5);
+    ucl.push(fcr+3*sigma); lcl.push(fcr-3*sigma); cl.push(fcr);
+  }
+  if(charts.spc) charts.spc.destroy();
+  charts.spc = new Chart(document.getElementById('spcChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'樣本強度',data:vals,borderColor:'#3DB46D',backgroundColor:'rgba(61,180,109,.08)',pointRadius:3,pointBackgroundColor:'#3DB46D',tension:.2,borderWidth:2},
+      {label:'UCL +3σ',data:ucl,borderColor:'#EF4F6B',borderDash:[6,4],pointRadius:0,borderWidth:1.5},
+      {label:'CL fcr',data:cl,borderColor:'#E8B14A',borderDash:[2,2],pointRadius:0,borderWidth:1.2},
+      {label:'LCL -3σ',data:lcl,borderColor:'#EF4F6B',borderDash:[6,4],pointRadius:0,borderWidth:1.5},
+    ]},options:chartOpts()
+  });
+}
+
+function drawCost(m){
+  if(charts.cost) charts.cost.destroy();
+  charts.cost = new Chart(document.getElementById('costChart'),{
+    type:'bar',
+    data:{labels:['水泥','飛灰','爐石','矽灰','強塑劑','骨材','其他'],
+      datasets:[{data:[
+        COST.c*m.c, COST.fa*m.fa, COST.sl*m.sl, COST.sf*m.sf,
+        COST.hr*m.hr, COST.sand*m.sand+COST.ca*(m.ca1+m.ca2), COST.w*m.w
+      ],backgroundColor:['#E8B14A','#A78BFA','#4FA8E8','#3DB46D','#EF4F6B','#F59E0B','rgba(255,255,255,.3)'],borderRadius:4}]},
+    options:Object.assign(chartOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'NT$ '+c.parsed.y.toFixed(0)}}}})
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   ③ PREDICT
+═══════════════════════════════════════════════════════ */
+function runPrediction(){
+  const btn=document.getElementById('pred-btn');
+  btn.innerHTML='<span class="spinner"></span> 預測中...';btn.disabled=true;
+  setTimeout(()=>{
+    const c=+document.getElementById('p-c').value, fa=+document.getElementById('p-fa').value;
+    const sl=+document.getElementById('p-sl').value, sf=+document.getElementById('p-sf').value;
+    const w=+document.getElementById('p-w').value, hr=+document.getElementById('p-hr').value;
+    const age=+document.getElementById('p-age').value;
+    const binder=c+fa+sl+sf;
+    const wb=w/binder;
+    const f28=predictF28(c,fa,sl,sf,wb,hr);
+    const fc=strengthDevelop(age, f28);
+    const repl=((fa+sl+sf)/binder*100);
+
+    document.getElementById('pred-val').textContent=fmt(fc,0);
+    document.getElementById('pred-mpa').textContent=fmt(fc*0.0980665,1);
+    document.getElementById('pred-psi').textContent=fmt(fc*14.2233,0);
+    document.getElementById('pred-wb').textContent=fmt(wb,3);
+    document.getElementById('pred-binder').textContent=fmt(binder,0);
+    document.getElementById('pred-replace').textContent=fmt(repl,0);
+    const conf = wb>0.25 && wb<0.55 && binder>250 && binder<700 ? 'High Confidence (R²=0.94)' : 'Medium Confidence';
+    document.getElementById('pred-conf').textContent=conf;
+
+    drawDevelop(f28);
+
+    state.f28=f28;
+    state.gwp=calcGWP(c,fa,sl,sf);
+    state.cost=calcCost({c,fa,sl,sf,w,hr,sand:780,ca1:1050,ca2:0});
+    state.batchCount++;
+    state.batches.push({id:'P'+String(state.batchCount).padStart(3,'0'),type:'AI預測',c,fa,sl,f28,gwp:state.gwp,cost:state.cost});
+    refreshOverview();
+
+    btn.innerHTML='▶ AI 強度預測';btn.disabled=false;
+  },500);
+}
+
+function initPredictChart(){drawDevelop(550)}
+function drawDevelop(f28){
+  const days=[1,2,3,5,7,14,21,28,56,90];
+  const fc=days.map(d=>strengthDevelop(d,f28));
+  if(charts.develop) charts.develop.destroy();
+  charts.develop = new Chart(document.getElementById('developChart'),{
+    type:'line',
+    data:{labels:days.map(d=>d+'d'),datasets:[
+      {label:'AI 預測強度',data:fc,borderColor:'#3DB46D',backgroundColor:'rgba(61,180,109,.12)',fill:true,tension:.3,pointBackgroundColor:'#3DB46D',pointRadius:4,borderWidth:2.5},
+      {label:'設計強度',data:days.map(()=>f28*0.85),borderColor:'#E8B14A',borderDash:[6,4],pointRadius:0,borderWidth:1.5}
+    ]},
+    options:chartOpts()
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   ③⁺ DURABILITY RUNTIME
+═══════════════════════════════════════════════════════ */
+function getDurInputs(){
+  return {
+    c:+document.getElementById('d-c').value, fa:+document.getElementById('d-fa').value,
+    sl:+document.getElementById('d-sl').value, sf:+document.getElementById('d-sf').value,
+    w:+document.getElementById('d-w').value, hr:+document.getElementById('d-hr').value,
+    sand:+document.getElementById('d-sand').value, cagg:+document.getElementById('d-cagg').value,
+    rh:+document.getElementById('d-rh').value, stress:+document.getElementById('d-stress').value
+  };
+}
+
+function runDurability(){
+  const btn=document.getElementById('dur-btn');
+  btn.innerHTML='<span class="spinner"></span> 預測中...';btn.disabled=true;
+  setTimeout(()=>{
+    const m=getDurInputs();
+    const binder=m.c+m.fa+m.sl+m.sf;
+    const wb=m.w/Math.max(binder,1);
+    const cl28 = predictChloride(m.c,m.fa,m.sl,m.sf,wb,28);
+    const sh90 = predictShrinkage(m.c,m.fa,m.sl,m.sf,m.w,wb,90,m.rh);
+    const cr90 = predictCreep(m.c,m.fa,m.sl,m.sf,m.w,wb,90,m.stress);
+    state.cl28=cl28; state.sh90=sh90; state.cr90=cr90;
+    document.getElementById('hdr-cl').textContent=cl28.toFixed(0);
+
+    document.getElementById('dur-cl').textContent=cl28.toFixed(0);
+    const cls = classifyChloride(cl28);
+    const clsEl=document.getElementById('dur-cl-class');
+    clsEl.textContent=cls.c; clsEl.className='badge '+cls.cls;
+    document.getElementById('dur-sh').textContent=sh90.toFixed(0);
+    document.getElementById('dur-cr').textContent=cr90.toFixed(0);
+
+    drawChloride(m.c,m.fa,m.sl,m.sf,wb);
+    drawShrinkage(m.c,m.fa,m.sl,m.sf,m.w,wb,m.rh);
+    drawCreep(m.c,m.fa,m.sl,m.sf,m.w,wb,m.stress);
+
+    // 評估
+    const scmR = (m.fa+m.sl+m.sf)/binder;
+    let lvl='良好', emoji='✅';
+    if(cl28>4000||sh90>800){lvl='需改善';emoji='⚠️'}
+    else if(cl28>2000||sh90>600){lvl='中等';emoji='◐'}
+    document.getElementById('dur-rec').innerHTML =
+      `${emoji} <b>耐久性評估：${lvl}</b><br>`+
+      `• 氯離子 28d: <b>${cl28.toFixed(0)} C</b>（${cls.c}）— `+
+      (cl28<2000?'符合海洋/橋樑等高耐久需求':cl28<4000?'適用一般建築結構':'建議提高 SCM 替代率或降低 w/b')+'<br>'+
+      `• 收縮 90d: <b>${sh90.toFixed(0)} με</b> — `+(sh90<400?'低收縮，裂縫風險低':sh90<600?'中等':'建議添加減縮劑或增加養護期')+'<br>'+
+      `• 潛變 90d: <b>${cr90.toFixed(0)} με</b>（@σ/fc=${m.stress}）— `+(cr90<400?'潛變變形可控':'高應力長期構件需評估')+'<br>'+
+      `• SCM 替代率 <b>${(scmR*100).toFixed(0)}%</b>，w/b=<b>${wb.toFixed(3)}</b>`;
+
+    btn.innerHTML='▶ 耐久性 AI 預測';btn.disabled=false;
+  },500);
+}
+
+function initDurabilityCharts(){
+  const m=getDurInputs();
+  const binder=m.c+m.fa+m.sl+m.sf;
+  const wb=m.w/Math.max(binder,1);
+  drawChloride(m.c,m.fa,m.sl,m.sf,wb);
+  drawShrinkage(m.c,m.fa,m.sl,m.sf,m.w,wb,m.rh);
+  drawCreep(m.c,m.fa,m.sl,m.sf,m.w,wb,m.stress);
+}
+
+function drawChloride(c,fa,sl,sf,wb){
+  const ages=[7,14,28,56,90,120,180];
+  const data=ages.map(a=>predictChloride(c,fa,sl,sf,wb,a));
+  if(charts.chl) charts.chl.destroy();
+  charts.chl = new Chart(document.getElementById('chlChart'),{
+    type:'line',
+    data:{labels:ages.map(a=>a+'d'),datasets:[
+      {label:'Chloride (Coulomb)',data,borderColor:'#E8B14A',backgroundColor:'rgba(232,177,74,.12)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:'#E8B14A',borderWidth:2.5},
+      {label:'ACI 中等界限 4000',data:ages.map(()=>4000),borderColor:'rgba(239,79,107,.6)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},
+      {label:'ACI 低界限 2000',data:ages.map(()=>2000),borderColor:'rgba(232,177,74,.6)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},
+      {label:'ACI 極低界限 1000',data:ages.map(()=>1000),borderColor:'rgba(61,180,109,.6)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},
+    ]},
+    options:chartOpts({y:{title:{display:true,text:'Coulomb',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}}})
+  });
+}
+
+function drawShrinkage(c,fa,sl,sf,w,wb,rh){
+  const ages=[7,14,28,56,90,120,180,365];
+  const data=ages.map(a=>predictShrinkage(c,fa,sl,sf,w,wb,a,rh));
+  if(charts.sh) charts.sh.destroy();
+  charts.sh = new Chart(document.getElementById('shChart'),{
+    type:'line',
+    data:{labels:ages.map(a=>a+'d'),datasets:[
+      {label:'Shrinkage με',data,borderColor:'#3DB46D',backgroundColor:'rgba(61,180,109,.12)',fill:true,tension:.3,pointRadius:4,pointBackgroundColor:'#3DB46D',borderWidth:2.5},
+    ]},
+    options:chartOpts({y:{title:{display:true,text:'με',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}}})
+  });
+}
+
+function drawCreep(c,fa,sl,sf,w,wb,stress){
+  const ages=[7,14,28,56,90,150,365,1000];
+  const data=ages.map(a=>predictCreep(c,fa,sl,sf,w,wb,a,stress));
+  if(charts.cr) charts.cr.destroy();
+  charts.cr = new Chart(document.getElementById('crChart'),{
+    type:'line',
+    data:{labels:ages.map(a=>a+'d'),datasets:[
+      {label:'Creep με',data,borderColor:'#A78BFA',backgroundColor:'rgba(167,139,250,.12)',fill:true,tension:.3,pointRadius:4,pointBackgroundColor:'#A78BFA',borderWidth:2.5},
+    ]},
+    options:chartOpts({y:{title:{display:true,text:'με',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}}})
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   CROSS-SYSTEM 配方推送（5 系統串接）
+═══════════════════════════════════════════════════════ */
+function captureSharedMix(prefix){
+  // prefix: 'm' (mix), 'p' (predict), 'd' (durability), 'pc' (precast)
+  const map = {
+    m:{c:'m-c',fa:'m-fa',sl:'m-sl',sf:'m-sf',mk:'m-mk',wb:'m-wb',w:'m-w',hr:'m-hr',sand:'m-sand',ca1:'m-ca1',ca2:'m-ca2'},
+    p:{c:'p-c',fa:'p-fa',sl:'p-sl',sf:'p-sf',w:'p-w',hr:'p-hr',sand:'p-fagg',ca1:'p-cagg'},
+    d:{c:'d-c',fa:'d-fa',sl:'d-sl',sf:'d-sf',w:'d-w',hr:'d-hr',sand:'d-sand',ca1:'d-cagg'},
+    pc:{c:'pc-c',fa:'pc-fa',sl:'pc-sl',wb:'pc-wb',w:'pc-w',hr:'pc-hr'}
+  };
+  const m = map[prefix];
+  Object.keys(m).forEach(k=>{
+    const el=document.getElementById(m[k]);
+    if(el) state.sharedMix[k] = +el.value || 0;
+  });
+}
+
+function applySharedMix(prefix){
+  const map = {
+    m:{c:'m-c',fa:'m-fa',sl:'m-sl',sf:'m-sf',mk:'m-mk',wb:'m-wb',w:'m-w',hr:'m-hr',sand:'m-sand',ca1:'m-ca1',ca2:'m-ca2'},
+    p:{c:'p-c',fa:'p-fa',sl:'p-sl',sf:'p-sf',w:'p-w',hr:'p-hr',sand:'p-fagg',ca1:'p-cagg'},
+    d:{c:'d-c',fa:'d-fa',sl:'d-sl',sf:'d-sf',w:'d-w',hr:'d-hr',sand:'d-sand',ca1:'d-cagg'},
+    pc:{c:'pc-c',fa:'pc-fa',sl:'pc-sl',wb:'pc-wb',w:'pc-w',hr:'pc-hr'}
+  };
+  const m = map[prefix];
+  Object.keys(m).forEach(k=>{
+    const el=document.getElementById(m[k]);
+    if(el && state.sharedMix[k]!=null) el.value = state.sharedMix[k];
+  });
+}
+
+function pushMixTo(target){
+  captureSharedMix('m');
+  const map={predict:'p',durability:'d',precast:'pc'};
+  applySharedMix(map[target]);
+  showToast(`配方已推送至「${target==='predict'?'強度預測':target==='durability'?'耐久性':'預鑄脫模'}」`);
+  // 自動切換 tab 並觸發
+  const tabBtn = document.querySelector(`[onclick*="'${target}'"]`);
+  if(tabBtn){
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('p-'+target).classList.add('active');
+    tabBtn.classList.add('active');
+    if(target==='predict' && !charts.develop) initPredictChart();
+    if(target==='durability' && !charts.chl) initDurabilityCharts();
+    if(target==='precast' && !charts.precast) initPrecastChart();
+    if(target==='durability') runDurability();
+    if(target==='predict') runPrediction();
+    if(target==='precast'){updateGWPPC();updPCTimeline();runPrecast();}
+  }
+}
+
+function pullFromMix(prefix){
+  captureSharedMix('m');
+  applySharedMix(prefix);
+  showToast('已帶入「配比智匯分析」配方');
+  if(prefix==='d') runDurability();
+}
+
+let toastTimer=null;
+function showToast(msg){
+  let el = document.getElementById('toast');
+  if(!el){
+    el=document.createElement('div');el.id='toast';
+    el.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#3DB46D,#2DA85F);color:#fff;padding:12px 24px;border-radius:24px;font-size:13px;font-weight:500;box-shadow:0 6px 24px rgba(61,180,109,.4);z-index:9999;letter-spacing:.04em;opacity:0;transition:opacity .3s';
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.style.opacity='0', 2500);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ④ OPTIMIZE (Pareto NSGA-II inspired)
+═══════════════════════════════════════════════════════ */
+function updOpt(){
+  ['o-fc-min','o-gwp-max','o-scm-min','o-wb-max','o-cl-max','o-sh-max','o-n'].forEach(id=>{
+    const el=document.getElementById(id);if(el) document.getElementById(id+'-v').textContent=el.value;
+  });
+}
+
+function runOptimize(){
+  const btn=document.getElementById('opt-btn');
+  btn.innerHTML='<span class="spinner"></span> 優化中...';btn.disabled=true;
+  setTimeout(()=>{
+    const fcMin=+document.getElementById('o-fc-min').value;
+    const gwpMax=+document.getElementById('o-gwp-max').value;
+    const scmMin=+document.getElementById('o-scm-min').value/100;
+    const wbMax=+document.getElementById('o-wb-max').value;
+    const clMax=+document.getElementById('o-cl-max').value;
+    const shMax=+document.getElementById('o-sh-max').value;
+    const N=+document.getElementById('o-n').value;
+
+    // Generate population
+    const pop=[];
+    for(let i=0;i<N*4;i++){
+      const c=80+Math.random()*350;
+      const fa=Math.random()*200;
+      const sl=Math.random()*350;
+      const sf=Math.random()<0.3?Math.random()*30:0;
+      const binder=c+fa+sl+sf;
+      const wb=0.25+Math.random()*(wbMax-0.25);
+      const w=binder*wb;
+      const hr=0.5+Math.random()*4;
+      const f28=predictF28(c,fa,sl,sf,wb,hr);
+      const gwp=calcGWP(c,fa,sl,sf);
+      const scm=(fa+sl+sf)/binder;
+      const cl28=predictChloride(c,fa,sl,sf,wb,28);
+      const sh90=predictShrinkage(c,fa,sl,sf,w,wb,90,65);
+      if(f28>=fcMin && gwp<=gwpMax && scm>=scmMin && cl28<=clMax && sh90<=shMax){
+        pop.push({c,fa,sl,sf,wb,w,hr,f28,gwp,scm,cl28,sh90,cost:calcCost({c,fa,sl,sf,w,hr,sand:760,ca1:1050,ca2:0})});
+      }
+    }
+
+    // Pareto front
+    const pareto = pop.filter(p=>!pop.some(q=>q!==p && q.f28>=p.f28 && q.gwp<=p.gwp && (q.f28>p.f28||q.gwp<p.gwp)));
+    pareto.sort((a,b)=>a.gwp-b.gwp);
+    const top5 = pareto.slice(0,5);
+
+    drawPareto(pop, pareto, fcMin, gwpMax);
+    renderOptList(top5);
+
+    btn.innerHTML='▶ 開始多目標優化';btn.disabled=false;
+  },800);
+}
+
+function initParetoChart(){
+  // empty initial chart
+  charts.pareto = new Chart(document.getElementById('paretoChart'),{
+    type:'scatter',
+    data:{datasets:[{label:'候選解',data:[],backgroundColor:'rgba(255,255,255,.12)'},{label:'Pareto 前緣',data:[],backgroundColor:'#3DB46D'}]},
+    options:Object.assign(chartOpts({x:{title:{display:true,text:'GWP (kg CO₂e/m³)',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}},
+      y:{title:{display:true,text:'f28 (kgf/cm²)',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}}}),{})
+  });
+}
+
+function drawPareto(all, pareto, fcMin, gwpMax){
+  if(!charts.pareto) initParetoChart();
+  charts.pareto.data.datasets[0].data = all.map(p=>({x:p.gwp,y:p.f28}));
+  charts.pareto.data.datasets[1].data = pareto.map(p=>({x:p.gwp,y:p.f28}));
+  charts.pareto.data.datasets[1].pointRadius=6;
+  charts.pareto.data.datasets[1].backgroundColor='#3DB46D';
+  charts.pareto.data.datasets[1].borderColor='#3DB46D';
+  charts.pareto.update();
+}
+
+function renderOptList(items){
+  if(items.length===0){
+    document.getElementById('opt-list').innerHTML='<div style="text-align:center;color:var(--muted);padding:30px">無符合條件的解，請放寬條件</div>';
+    return;
+  }
+  document.getElementById('opt-list').innerHTML = items.map((p,i)=>`
+    <div class="opt-row ${i===0?'best':i===1?'lowgwp':''}">
+      <div class="opt-rank">${i+1}</div>
+      <div class="opt-info">
+        <div class="opt-mix">配方 #${i+1}${i===0?' · 最佳碳排':''}</div>
+        <div class="opt-prop">C ${p.c.toFixed(0)} · FA ${p.fa.toFixed(0)} · Sl ${p.sl.toFixed(0)} · SF ${p.sf.toFixed(0)} · w/b ${p.wb.toFixed(2)} · HRWR ${p.hr.toFixed(1)}</div>
+      </div>
+      <div class="opt-mtr">
+        <div><div class="opt-mv" style="color:#7FE0A8">${p.f28.toFixed(0)}</div><div class="opt-ml">f28</div></div>
+        <div><div class="opt-mv" style="color:var(--gold2)">${p.gwp.toFixed(1)}</div><div class="opt-ml">GWP</div></div>
+        <div><div class="opt-mv" style="color:#A0CCED">${(p.scm*100).toFixed(0)}%</div><div class="opt-ml">SCM</div></div>
+        <div><div class="opt-mv" style="color:#C4B5FD">${p.cl28?p.cl28.toFixed(0):'—'}</div><div class="opt-ml">Cl⁻ 28d</div></div>
+        <div><div class="opt-mv" style="color:#F4839A">${p.sh90?p.sh90.toFixed(0):'—'}</div><div class="opt-ml">收縮 με</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ⑤ EARLY WARN
+═══════════════════════════════════════════════════════ */
+function runWarn(){
+  const elapsed=+document.getElementById('w-elapsed').value;
+  const T=+document.getElementById('w-t').value;
+  const tg12=+document.getElementById('w-target12').value;
+  const tg24=+document.getElementById('w-target24').value;
+  // Build hourly profile up to elapsed, hold T constant (could be more sophisticated)
+  const dt=0.25; const n=Math.ceil(elapsed/dt);
+  const times=[],temps=[];
+  for(let i=0;i<n;i++){times.push(i*dt);temps.push(T)}
+  const M = maturity(times,temps,dt);
+  const teH = equivAge(times,temps,dt);
+  const teD = teH/24;
+  // Use stored f28 or estimate
+  const f28 = state.f28 || 500;
+  const curStr = strengthDevelop(teD, f28);
+  const ratio12 = curStr/tg12;
+  const ratio24 = curStr/tg24;
+
+  document.getElementById('w-te').textContent = teD.toFixed(2);
+  document.getElementById('w-mat').textContent = M.toFixed(0);
+  document.getElementById('w-curstr').textContent = curStr.toFixed(0);
+  document.getElementById('ds-12h').textContent = (ratio12*100).toFixed(0)+'%';
+  document.getElementById('ds-24h').textContent = (ratio24*100).toFixed(0)+'%';
+  // K rate
+  const K = curStr/Math.max(0.01,elapsed);
+  document.getElementById('ds-k').textContent = K.toFixed(1)+' kgf/cm²·h';
+
+  // ETA to 12h target
+  let etaH = null;
+  for(let h=elapsed;h<48;h+=0.5){
+    const fc = strengthDevelop(equivAge(Array(Math.ceil(h/dt)).fill(0).map((_,i)=>i*dt), Array(Math.ceil(h/dt)).fill(T), dt)/24, f28);
+    if(fc>=tg12){etaH=h;break}
+  }
+  document.getElementById('w-eta').textContent = etaH?etaH.toFixed(1)+' h':'>48 h';
+
+  // Status
+  const ring=document.getElementById('warn-ring'); const txt=document.getElementById('warn-txt'); const rec=document.getElementById('warn-rec');
+  if(ratio12>=1){ring.className='tl-ring g';ring.textContent='✓';txt.className='tl-txt g';txt.textContent='發展正常';
+    rec.innerHTML='✅ 早期強度發展正常，已達 12h 目標。建議按既定排程進入下一工序。'}
+  else if(ratio12>=0.7){ring.className='tl-ring a';ring.textContent='◐';txt.className='tl-txt a';txt.textContent='接近達標';
+    rec.innerHTML='⚠️ 強度接近 12h 目標（'+(ratio12*100).toFixed(0)+'%）。建議延長養護 1–2 小時並持續監測。'}
+  else {ring.className='tl-ring r';ring.textContent='⚠';txt.className='tl-txt r';txt.textContent='強度落後';
+    rec.innerHTML='🚫 強度發展落後排程（僅 '+(ratio12*100).toFixed(0)+'% 達標）。建議：① 提高養護溫度 5–10°C ② 延後脫模或開模 ③ 檢查配方一致性。'}
+
+  document.getElementById('warn-prog').style.width=Math.min(100,ratio12*100)+'%';
+  document.getElementById('warn-prog').className = 'prog-fill'+(ratio12<0.7?' warn':'');
+
+  // Log event
+  if(ratio12<0.7){
+    state.warnEvents.unshift({time:new Date().toLocaleTimeString().slice(0,5),batch:document.getElementById('w-batch').value,event:'12h 強度低於目標',level:'高',sug:'升溫養護'});
+  } else if(ratio12<1){
+    state.warnEvents.unshift({time:new Date().toLocaleTimeString().slice(0,5),batch:document.getElementById('w-batch').value,event:'12h 強度接近邊界',level:'中',sug:'延長監測'});
+  }
+  if(state.warnEvents.length){
+    document.getElementById('warn-log').innerHTML=state.warnEvents.slice(0,8).map(e=>
+      `<tr><td>${e.time}</td><td>${e.batch}</td><td>${e.event}</td><td><span class="badge ${e.level=='高'?'bg-rose':'bg-gold'}">${e.level}</span></td><td>${e.sug}</td></tr>`).join('');
+  }
+
+  drawWarn(elapsed, T, f28, tg12);
+}
+
+function simulateWarn(){
+  document.getElementById('w-elapsed').value=(8+Math.random()*6).toFixed(1);
+  document.getElementById('w-t').value=(25+Math.random()*30).toFixed(0);
+  runWarn();
+}
+
+function initWarnChart(){drawWarn(6, 42, state.f28||500, 120)}
+function drawWarn(elapsed, T, f28, tg){
+  const dt=0.5; const N=72;
+  const labels=[]; const strData=[]; const tempData=[];
+  for(let i=0;i<N;i++){
+    const h=i*dt;
+    labels.push(h.toFixed(1)+'h');
+    const tempsArr=Array(Math.ceil(h/dt)).fill(T);
+    const teH = equivAge(tempsArr.map((_,j)=>j*dt), tempsArr, dt);
+    strData.push(strengthDevelop(teH/24, f28));
+    tempData.push(T);
+  }
+  if(charts.warn) charts.warn.destroy();
+  charts.warn = new Chart(document.getElementById('warnChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'預測強度',data:strData,borderColor:'#3DB46D',backgroundColor:'rgba(61,180,109,.1)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5,yAxisID:'y'},
+      {label:'12h 目標',data:labels.map(()=>tg),borderColor:'#EF4F6B',borderDash:[6,4],pointRadius:0,borderWidth:1.5,yAxisID:'y'},
+      {label:'構件溫度',data:tempData,borderColor:'rgba(232,177,74,.6)',borderDash:[3,3],pointRadius:0,borderWidth:1.5,yAxisID:'y1'},
+    ]},
+    options:chartOpts({y:{title:{display:true,text:'強度 kgf/cm²',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}},
+      y1:{position:'right',title:{display:true,text:'°C',color:'#E8B14A'},grid:{display:false},ticks:{color:'rgba(232,177,74,.5)'}}})
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   ⑥ PRECAST DEMOULDING
+═══════════════════════════════════════════════════════ */
+function updPC(){
+  ['pre','rate','peak','hold','cool'].forEach(k=>{
+    const v=document.getElementById('pc-'+k).value;
+    const suf=k=='peak'?' °C':(k=='rate'||k=='cool')?' °C/h':' h';
+    document.getElementById('pc-'+k+'-v').textContent=v+suf;
+  });
+  updateGWPPC();
+  updPCTimeline();
+  if(state.precastF28) calcPrecast();
+}
+
+function updateGWPPC(){
+  const g = calcGWP(+document.getElementById('pc-c').value,+document.getElementById('pc-fa').value,+document.getElementById('pc-sl').value);
+  const el = document.getElementById('pc-gwp');
+  el.textContent = g.toFixed(1)+' kg CO₂e/m³';
+  el.className='v '+gwpClass(g);
+}
+['pc-c','pc-fa','pc-sl'].forEach(id=>document.getElementById(id).addEventListener('input',updateGWPPC));
+
+function getPCParams(){
+  return {pre:+document.getElementById('pc-pre').value,rate:+document.getElementById('pc-rate').value,
+          peak:+document.getElementById('pc-peak').value,hold:+document.getElementById('pc-hold').value,
+          cool_rate:+document.getElementById('pc-cool').value};
+}
+
+function buildPCProfile(p){
+  const dt=0.25;
+  const heat_t=(p.peak-T_AMB)/p.rate;
+  const cool_t=(p.peak-T_AMB)/p.cool_rate;
+  const total=p.pre+heat_t+p.hold+cool_t+2;
+  const n=Math.ceil(total/dt);
+  const times=[],temps=[];
+  for(let i=0;i<n;i++){
+    const t=i*dt;
+    times.push(t);
+    let T;
+    if(t<p.pre)T=T_AMB;
+    else if(t<p.pre+heat_t)T=T_AMB+p.rate*(t-p.pre);
+    else if(t<p.pre+heat_t+p.hold)T=p.peak;
+    else if(t<p.pre+heat_t+p.hold+cool_t)T=p.peak-p.cool_rate*(t-p.pre-heat_t-p.hold);
+    else T=T_AMB;
+    temps.push(Math.max(T_AMB,T));
+  }
+  return {times,temps,total,heat_t,cool_t,dt};
+}
+
+function updPCTimeline(){
+  const p=getPCParams();
+  const heat_t=(p.peak-T_AMB)/p.rate;
+  const cool_t=(p.peak-T_AMB)/p.cool_rate;
+  const total=p.pre+heat_t+p.hold+cool_t;
+  document.getElementById('tl-p').style.flex=p.pre/total;
+  document.getElementById('tl-p').textContent=p.pre.toFixed(1)+'h';
+  document.getElementById('tl-h').style.flex=heat_t/total;
+  document.getElementById('tl-h').textContent=heat_t.toFixed(1)+'h';
+  document.getElementById('tl-d').style.flex=p.hold/total;
+  document.getElementById('tl-d').textContent=p.hold+'h';
+  document.getElementById('tl-c').style.flex=cool_t/total;
+  document.getElementById('tl-c').textContent=cool_t.toFixed(1)+'h';
+  const labels=[0,p.pre,p.pre+heat_t,p.pre+heat_t+p.hold,total];
+  document.getElementById('tl-marks').innerHTML=labels.map(h=>`<span>${h.toFixed(1)}h</span>`).join('');
+}
+
+function runPrecast(){
+  const btn=document.getElementById('pc-btn');
+  btn.innerHTML='<span class="spinner"></span> 分析中...';btn.disabled=true;
+  setTimeout(()=>{
+    const c=+document.getElementById('pc-c').value,fa=+document.getElementById('pc-fa').value,sl=+document.getElementById('pc-sl').value;
+    const wb=+document.getElementById('pc-wb').value,hr=+document.getElementById('pc-hr').value;
+    state.precastF28 = predictF28(c,fa,sl,0,wb,hr);
+    state.gwp=calcGWP(c,fa,sl);
+    state.f28=state.precastF28;
+    state.batchCount++;
+    state.batches.push({id:'PC'+String(state.batchCount).padStart(3,'0'),type:'預鑄',c,fa,sl,f28:state.precastF28,gwp:state.gwp,cost:calcCost({c,fa,sl,w:+document.getElementById('pc-w').value,hr,sand:760,ca1:1050,ca2:0})});
+    refreshOverview();
+    calcPrecast();
+    btn.innerHTML='▶ 脫模強度分析';btn.disabled=false;
+  },500);
+}
+
+function calcPrecast(){
+  const p=getPCParams();
+  const dmTarget=+document.getElementById('pc-dm').value;
+  const {times,temps,total,dt}=buildPCProfile(p);
+  const f28=state.precastF28;
+  const strData=[],tempData=[],labels=[];
+  let dmHour=null,dmIdx=-1;
+  let cumM=0,cumTeH=0;
+  for(let i=0;i<times.length;i++){
+    cumM += (temps[i]-T0)*dt;
+    cumTeH += Math.exp(-E_act/R_gas*(1/(temps[i]+273.15)-1/T_ref))*dt;
+    const fc = strengthDevelop(cumTeH/24, f28);
+    strData.push(+(fc/f28*100).toFixed(2));
+    tempData.push(+temps[i].toFixed(1));
+    labels.push(times[i]<24?times[i].toFixed(0)+'h':(times[i]/24).toFixed(1)+'d');
+    if(!dmHour && fc>=dmTarget){dmHour=times[i];dmIdx=i}
+  }
+  state.precastDmTime = dmHour;
+
+  const teD=cumTeH/24;
+  const lastFc = strengthDevelop(teD, f28);
+  const sf = lastFc/dmTarget;
+  const pct = lastFc/dmTarget*100;
+  document.getElementById('pc-mte').textContent=teD.toFixed(2);
+  document.getElementById('pc-mmat').textContent=cumM.toFixed(0);
+  document.getElementById('pc-mstr').textContent=lastFc.toFixed(0);
+  document.getElementById('pc-msf').textContent=sf.toFixed(2)+'x';
+  document.getElementById('pc-pct').textContent=Math.min(100,pct).toFixed(1)+'%';
+  document.getElementById('pc-pct').className='ds-val '+(pct>=100?'g':pct>=80?'a':'r');
+  if(dmHour){
+    const ts = dmHour<24?dmHour.toFixed(1)+' h 後':(dmHour/24).toFixed(1)+' 天後';
+    document.getElementById('pc-time').textContent=ts;
+    // strength at demoulding
+    let cT=0;
+    for(let i=0;i<times.length;i++){
+      if(times[i]>dmHour) break;
+      cT += Math.exp(-E_act/R_gas*(1/(temps[i]+273.15)-1/T_ref))*dt;
+    }
+    document.getElementById('pc-dmstr').textContent=strengthDevelop(cT/24,f28).toFixed(0)+' kgf/cm²';
+  } else {
+    document.getElementById('pc-time').textContent='養護期內未達標';
+    document.getElementById('pc-dmstr').textContent='—';
+  }
+  document.getElementById('pc-prog').style.width=Math.min(100,pct)+'%';
+  document.getElementById('pc-prog').className='prog-fill'+(pct<80?' warn':'');
+
+  // Light
+  const ring=document.getElementById('pc-ring'),lbl=document.getElementById('pc-light'),rec=document.getElementById('pc-rec');
+  if(pct>=100){ring.className='tl-ring g';ring.textContent='✓';lbl.className='tl-txt g';lbl.textContent='可安全脫模';
+    rec.innerHTML='✅ 強度已達脫模門檻（安全係數 '+sf.toFixed(2)+'x）。建議執行脫模並轉移至後養護區。'}
+  else if(pct>=80){ring.className='tl-ring a';ring.textContent='◐';lbl.className='tl-txt a';lbl.textContent='接近達標';
+    rec.innerHTML='⚠️ 強度達 '+pct.toFixed(0)+'%，'+(dmHour?'預計 '+(dmHour<24?dmHour.toFixed(1)+'h':(dmHour/24).toFixed(1)+'d')+' 內可達標':'需延長養護')+'。'}
+  else {ring.className='tl-ring r';ring.textContent='✕';lbl.className='tl-txt r';lbl.textContent='尚未達脫模強度';
+    rec.innerHTML='🚫 強度不足（'+pct.toFixed(0)+'%），嚴禁脫模。'+(dmHour?'預測達標：'+(dmHour<24?dmHour.toFixed(1)+'h':(dmHour/24).toFixed(1)+'d')+' 後':'請檢查配方')}
+
+  drawPrecast(labels, strData, tempData, dmTarget/f28*100, dmIdx);
+}
+
+function initPrecastChart(){updPC();drawPrecast([],[],[],50,-1)}
+function drawPrecast(labels,str,temp,thrPct,dmIdx){
+  if(charts.precast) charts.precast.destroy();
+  charts.precast = new Chart(document.getElementById('precastChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'強度 %',data:str,borderColor:'#3DB46D',backgroundColor:'rgba(61,180,109,.1)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5,yAxisID:'y'},
+      {label:'溫度',data:temp,borderColor:'rgba(232,177,74,.6)',borderDash:[3,3],pointRadius:0,borderWidth:1.5,yAxisID:'y1'},
+      {label:'脫模門檻',data:labels.map(()=>thrPct),borderColor:'rgba(239,79,107,.7)',borderDash:[6,4],pointRadius:0,borderWidth:1.5,yAxisID:'y'},
+    ]},
+    options:chartOpts({y:{min:0,max:110,title:{display:true,text:'強度比 %',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}},
+      y1:{position:'right',min:0,max:100,title:{display:true,text:'°C',color:'#E8B14A'},grid:{display:false},ticks:{color:'rgba(232,177,74,.5)'}}})
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   ⑦ EXPLORE
+═══════════════════════════════════════════════════════ */
+function initExploreCharts(){
+  // Feature bars
+  document.getElementById('feat-bars').innerHTML = FEATURES.map(f=>`
+    <div class="feat-bar">
+      <div class="feat-name">${f.n}</div>
+      <div class="feat-track"><div class="feat-fill" style="width:${f.v*100}%;background:linear-gradient(90deg,${f.c}AA,${f.c})"></div></div>
+      <div class="feat-pct">${(f.v*100).toFixed(0)}%</div>
+    </div>`).join('');
+
+  // Scatter GWP vs f28
+  const data = TRAIN_SAMPLES.map(s=>({x:calcGWP(s.c,s.fa,s.sl),y:s.f28}));
+  charts.scat = new Chart(document.getElementById('scatChart'),{
+    type:'scatter',
+    data:{datasets:[{label:'歷史樣本',data,backgroundColor:'#3DB46D',borderColor:'#3DB46D',pointRadius:6}]},
+    options:chartOpts({x:{title:{display:true,text:'GWP (kg CO₂e/m³)',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}},
+      y:{title:{display:true,text:'f28 (kgf/cm²)',color:'#999'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)'}}})
+  });
+
+  // Dataset
+  document.getElementById('ds-tbl').innerHTML = TRAIN_SAMPLES.map((s,i)=>
+    `<tr><td>${String(i+1).padStart(3,'0')}</td><td>${s.c}</td><td>${s.fa}</td><td>${s.sl}</td><td>${s.wb}</td><td>${s.hr}</td><td><b style="color:#7FE0A8">${s.f28}</b></td><td>${calcGWP(s.c,s.fa,s.sl).toFixed(1)}</td><td><span class="badge bg-sky">${s.t}</span></td></tr>`
+  ).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+window.addEventListener('load',()=>{
+  initOverviewCharts();
+  updPC();
+  updateGWPPC();
+  updOpt();
+  refreshOverview();
+  // Welcome toast
+  setTimeout(()=>showToast('STEVE YU CONCRETE AI v2.0 — 7 子系統已就緒'), 600);
+});
+</script>
+</body>
+</html>
